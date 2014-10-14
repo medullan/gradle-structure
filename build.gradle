@@ -1,46 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'war'
 
-repositories {
-    mavenCentral()
-}
-
-ext {
-    java_version = '1.6'
-    project_build_sourceEncoding = 'UTF-8'
-    project_reporting_outputEncoding = 'UTF-8'
-    spring_data_jpa_version = '1.3.0.RELEASE'
-    jsp_version = '2.2'
-    jstl_version = '1.2'
-    servlet_version = '2.5'
-    javax_el_version = '2.2'
-    jaxb_api_version = '2.2.7'
-    jaxb_impl_version = '2.2.7-b53'
-    hibernate_version = '4.1.9.Final'
-    hibernate_jpa_version = '1.0.1.Final'
-    validation_version = '1.0.0.GA'
-    hibernate_validator_version = '4.3.0.Final'
-    commons_dbcp_version = '1.4'
-    ehcache_version = '2.6.5'
-    hsqldb_version = '2.2.9'
-    aspectj_version = '1.7.2'
-    logback_version = '1.0.9'
-    log4j_version = '1.2.17'
-    slf4j_version = '1.7.2'
-    rome_version = '1.0'
-    junit_version = '4.11'
-    hamcrest_version = '1.3'
-    jodatime_hibernate_version = '1.3'
-    jodatime_jsptags_version = '1.1.1'
-    jodatime_version = '2.2'
-    jadira_usertype_core_version = '3.1.0.CR1'
-    webjars_bootstrap_version = '2.3.0'
-    webjars_jquery_ui_version = '1.9.2'
-    webjars_jquery_version = '1.9.0'
-    dandelion_datatables_version = '0.8.7'
-    mysql_version = '5.1.22'
-    tomcat_version = '7.0.34'
-}
 
 buildscript {
     repositories {
@@ -54,59 +14,89 @@ buildscript {
 
 apply plugin: 'tomcat'
 
-configurations.all {
-    resolutionStrategy {
-        eachDependency { details ->
-            if (!details.requested.version) {
-                if (details.requested.group == 'org.springframework') {
-                    details.useVersion '3.2.2.RELEASE'
-                }
-                else if (details.requested.group == 'org.hibernate') {
-                    details.useVersion '4.1.9.Final'
-                }
-            }
-        }
+allprojects {
+
+    ext {
+        java_version = '1.6'
+        project_build_sourceEncoding = 'UTF-8'
+        project_reporting_outputEncoding = 'UTF-8'
+        spring_data_jpa_version = '1.3.0.RELEASE'
+        org_springframework_version = '3.2.2.RELEASE'
+        org_hibernate_version = '4.1.9.Final'
+        jsp_version = '2.2'
+        jstl_version = '1.2'
+        servlet_version = '2.5'
+        javax_el_version = '2.2'
+        jaxb_api_version = '2.2.7'
+        jaxb_impl_version = '2.2.7-b53'
+        hibernate_version = '4.1.9.Final'
+        hibernate_jpa_version = '1.0.1.Final'
+        validation_version = '1.0.0.GA'
+        hibernate_validator_version = '4.3.0.Final'
+        commons_dbcp_version = '1.4'
+        ehcache_version = '2.6.5'
+        hsqldb_version = '2.2.9'
+        aspectj_version = '1.7.2'
+        logback_version = '1.0.9'
+        log4j_version = '1.2.17'
+        slf4j_version = '1.7.2'
+        rome_version = '1.0'
+        junit_version = '4.11'
+        hamcrest_version = '1.3'
+        jodatime_hibernate_version = '1.3'
+        jodatime_jsptags_version = '1.1.1'
+        jodatime_version = '2.2'
+        jadira_usertype_core_version = '3.1.0.CR1'
+        webjars_bootstrap_version = '2.3.0'
+        webjars_jquery_ui_version = '1.9.2'
+        webjars_jquery_version = '1.9.0'
+        dandelion_datatables_version = '0.8.7'
+        mysql_version = '5.1.22'
+        tomcat_version = '7.0.34'
     }
-}
 
-configurations {
-    web
-    database
-    tools
-    date
-    spring
-    hibernate
-    log
+    sourceCompatibility = "${java_version}"
+    targetCompatibility = "${java_version}"
 
-    compile.extendsFrom spring, web, date, tools, hibernate
-    runtime.extendsFrom database, log
+    [compileJava, compileTestJava]*.options*.encoding = "${project_build_sourceEncoding}"
+
+    repositories {
+        mavenCentral()
+    }
+
+    apply plugin: 'java'
+    apply plugin: 'idea'
+
+    group = 'com.medullan.app'
+    version = '0.1'
+
+    configurations {
+        web
+        database
+        tools
+        date
+        spring
+        hibernate
+        log
+
+        compile.extendsFrom spring, web, date, tools, hibernate
+        runtime.extendsFrom database, log
+    }
+
+    dependencies {
+
+        testCompile("org.springframework:spring-test:${org_springframework_version}")
+        testCompile("junit:junit:${junit_version}")
+        testCompile("org.hamcrest:hamcrest-library:${hamcrest_version}")
+        testCompile("org.hamcrest:hamcrest-core:${hamcrest_version}")
+    }
+
 }
 
 dependencies {
-    spring("org.springframework.data:spring-data-jpa:${spring_data_jpa_version}") {
-        exclude group: 'org.springframework', module: '*'
-    }
+    compile project(':service')
 
-    spring("org.springframework:spring-jdbc")
-    spring("org.springframework:spring-aop")
-    spring("org.springframework:spring-webmvc")
-    spring("org.springframework:spring-tx")
-    spring("org.springframework:spring-context-support") {
-        exclude group: 'quartz', module: 'quartz'
-    }
-    spring("org.springframework:spring-orm")
-    spring("org.springframework:spring-oxm") {
-        exclude group: 'commons-lang', module: 'commons-lang'
-    }
-    spring("org.springframework:spring-jms")
-
-    hibernate("org.hibernate:hibernate-core") {
-        exclude group: 'asm', module: 'asm-attrs'
-    }
-    hibernate("org.hibernate:hibernate-entitymanager")
-    hibernate("org.hibernate.javax.persistence:hibernate-jpa-2.0-api:${hibernate_jpa_version}")
-    hibernate("org.hibernate:hibernate-validator:${hibernate_validator_version}")
-    hibernate("org.hibernate:hibernate-ehcache")
+    spring("org.springframework:spring-webmvc:${org_springframework_version}")
 
     web("javax.validation:validation-api:${validation_version}")
     web("javax.servlet:jstl:${jstl_version}")
@@ -117,18 +107,10 @@ dependencies {
     web("com.github.dandelion:datatables-servlet2:${dandelion_datatables_version}")
 
     tools("rome:rome:${rome_version}")
-    tools("net.sf.ehcache:ehcache-core:${ehcache_version}") {
-        exclude group: 'commons-logging', module: 'commons-logging'
-    }
     tools("org.webjars:bootstrap:${webjars_bootstrap_version}")
     tools("org.webjars:jquery-ui:${webjars_jquery_ui_version}")
     tools("org.webjars:jquery:${webjars_jquery_version}")
     tools("org.aspectj:aspectjrt:${aspectj_version}")
-
-    date("org.jadira.usertype:usertype.core:${jadira_usertype_core_version}")
-    date("joda-time:joda-time:${jodatime_version}")
-    date("joda-time:joda-time-hibernate:${jodatime_hibernate_version}")
-    date("joda-time:joda-time-jsptags:${jodatime_jsptags_version}")
 
     database("org.hsqldb:hsqldb:${hsqldb_version}")
     database("commons-dbcp:commons-dbcp:${commons_dbcp_version}")
@@ -146,11 +128,6 @@ dependencies {
     log("ch.qos.logback:logback-core:${logback_version}")
     runtime("org.aspectj:aspectjweaver:${aspectj_version}")
 
-    testCompile("org.springframework:spring-test")
-    testCompile("junit:junit:${junit_version}")
-    testCompile("org.hamcrest:hamcrest-library:${hamcrest_version}")
-    testCompile("org.hamcrest:hamcrest-core:${hamcrest_version}")
-
     tomcat("org.apache.tomcat.embed:tomcat-embed-core:${tomcat_version}")
     tomcat("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcat_version}")
     tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcat_version}") {
@@ -158,37 +135,111 @@ dependencies {
     }
 }
 
-sourceCompatibility = "${java_version}"
-targetCompatibility = "${java_version}"
-[compileJava, compileTestJava]*.options*.encoding = "${project_build_sourceEncoding}"
-
 processTestResources {
     from(sourceSets.test.java.srcDirs) {
         include '**/*.xml'
     }
 }
 
-war.baseName = 'petclinic'
+
+
+project(':model') {
+     
+    configurations {
+        hibernate
+        date
+        spring
+        tools
+
+        compile.extendsFrom date, hibernate, spring, tools
+    }
+
+    dependencies {
+        tools("net.sf.ehcache:ehcache-core:${ehcache_version}") {
+            exclude group: 'commons-logging', module: 'commons-logging'
+        }
+        
+        date("org.jadira.usertype:usertype.core:${jadira_usertype_core_version}")
+        date("joda-time:joda-time:${jodatime_version}")
+        date("joda-time:joda-time-hibernate:${jodatime_hibernate_version}")
+        date("joda-time:joda-time-jsptags:${jodatime_jsptags_version}")
+
+        hibernate("org.hibernate:hibernate-core:${org_hibernate_version}") {
+            exclude group: 'asm', module: 'asm-attrs'
+        }
+        hibernate("org.hibernate:hibernate-entitymanager:${org_hibernate_version}")
+        hibernate("org.hibernate.javax.persistence:hibernate-jpa-2.0-api:${hibernate_jpa_version}")
+        hibernate("org.hibernate:hibernate-validator:${hibernate_validator_version}")
+        hibernate("org.hibernate:hibernate-ehcache:${org_hibernate_version}")
+
+        spring("org.springframework:spring-jms:${org_springframework_version}")
+        spring("org.springframework:spring-aop:${org_springframework_version}")
+        spring("org.springframework.data:spring-data-jpa:${spring_data_jpa_version}") {
+            exclude group: 'org.springframework', module: '*'
+        }
+        spring("org.springframework:spring-context-support:${org_springframework_version}") {
+            exclude group: 'quartz', module: 'quartz'
+        }
+        spring("org.springframework:spring-tx:${org_springframework_version}")
+        spring("org.springframework:spring-orm:${org_springframework_version}")
+        spring("org.springframework:spring-jdbc:${org_springframework_version}")
+        spring("org.springframework:spring-oxm:${org_springframework_version}") {
+            exclude group: 'commons-lang', module: 'commons-lang'
+        }
+    }
+}
+ 
+project(':service') {
+ 
+    dependencies {
+        compile project(':model')
+    }
+}
+
+allprojects {
+    configurations.all {
+        resolutionStrategy {
+            eachDependency { details ->
+                println details.requested
+            }
+            //println it
+        }
+    }
+}
 
 tomcatRun {
     httpPort = 9966
-    contextPath = 'petclinic'
+    //contextPath = "${project.name}"
 }
 
 [tomcatRun, tomcatStop]*.stopPort = 8191
 [tomcatRun, tomcatStop]*.stopKey = 'stopKey'
 
-task integrationTest(type: Test) << {
-    include '**/*Start.*'
+test {
+    exclude '**/*IntegrationTest.*'
+    exclude '**/*IT.*'
 }
 
-integrationTest.doFirst {
-    println 'Starting the embedded tomcat server'
-    tomcatRun.daemon = true
-    tomcatRun.execute()
+task integrationTest(type: Test) {
+    include '**/*IntegrationTest.*'
+    include '**/*IT.*' 
+
+    println 'integrationTest init'
 }
 
-integrationTest.doLast {
-    println 'Stopping the embedded tomcat server'
-    tomcatStop.execute()
+task functionalTest(type: Test) {
+    include '**/*IT.*' 
+
+    println 'functionalTest init'
+
+    doFirst {
+        println 'Starting the embedded tomcat server'
+        tomcatRun.daemon = true
+        tomcatRun.execute()
+    }
+
+    doLast {
+        println 'Stopping the embedded tomcat server'
+        tomcatStop.execute()
+    }
 }
